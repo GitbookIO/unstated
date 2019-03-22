@@ -1,0 +1,58 @@
+{
+    "name": "@gitbook/unstated",
+    "version": "0.0.0",
+    "description": "Simple state library for react application",
+    "main": "dist/unstated.js",
+    "module": "dist/unstated.es.js",
+    "types": "dist/unstated.d.ts",
+    "repository": "https://github.com/GitbookIO/unstated",
+    "author": "Samy Pessé <samy@gitbook.com>",
+    "license": "MIT",
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "peerDependencies": {
+        "react-dom": "*"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.11",
+        "@types/react": "^16.8.8",
+        "@types/react-dom": "^16.8.3",
+        "jest": "^24.5.0",
+        "react": "^16.8.4",
+        "react-dom": "^16.8.4",
+        "react-test-renderer": "^16.8.4",
+        "rollup": "^1.7.0",
+        "rollup-plugin-typescript2": "^0.20.1",
+        "ts-jest": "^24.0.0",
+        "tslint": "^5.14.0",
+        "tslint-config-gitbook": "^1.0.0",
+        "typescript": "^3.3.4000"
+    },
+    "scripts": {
+        "lint": "tslint --project ./tsconfig.json",
+        "build": "rollup --config rollup.config.js",
+        "test": "jest"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+        "globals": {
+            "ts-jest": {
+                "diagnostics": false
+            }
+        },
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js",
+            "jsx",
+            "json",
+            "node"
+        ],
+        "testEnvironment": "node"
+    }
+}
