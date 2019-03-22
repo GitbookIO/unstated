@@ -12,7 +12,9 @@ import { StateContext } from './provider';
 export type ContainersType<C extends Container> = Array<
     ContainerConstructor<C> | C
 >;
-export type ContainersInstance<Containers extends ContainersType<Container>> = Container[];
+export type ContainersInstance<
+    Containers extends ContainersType<Container>
+> = Container[];
 
 /*
  * Get the state of containers.
