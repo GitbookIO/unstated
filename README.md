@@ -30,7 +30,7 @@ class Counter extends Container<{
 }
 
 function Counter() {
-    const [counter] = useUnstated(Counter);
+    const counter = useUnstated(Counter);
 
     return (
         <div>
@@ -48,6 +48,36 @@ render(
     document.getElementById('root')
 );
 ```
+
+## API
+
+### `useUnstated`
+
+```ts
+import { useUnstated } from '@gitbook/unstated';
+
+useUnstated(
+    C: ContainerConstructor,
+    shouldUpdate?: (C: Container) => any
+): Container
+```
+
+Hook to access a container and update the compontent each time the state is updated.
+
+The `shouldUpdate` function can be used to prevent update of your component for certain updates of state. The result of the function will be shallowly compare to previous result.
+
+### `useContainer`
+
+```ts
+import { useContainer } from '@gitbook/unstated';
+
+useContainer(
+    C: ContainerConstructor
+): Container
+```
+
+Similar to `useUnstated` but the component is not updated when the state is updated. You can use this hook to access actions to modify the container.
+
 
 ## Credits
 

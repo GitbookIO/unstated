@@ -25,7 +25,7 @@ class CounterContainer extends Container<{ count: number }> {
 
 function Counter() {
     return (
-        <Subscribe to={[CounterContainer]}>
+        <Subscribe to={CounterContainer}>
             {counter => (
                 <div>
                     <span>{counter.state.count}</span>
@@ -42,7 +42,7 @@ function Counter() {
 }
 
 function CounterWithUse() {
-    const [counter] = useUnstated(CounterContainer);
+    const counter = useUnstated(CounterContainer);
     return (
         <div>
             <span>{counter.state.count}</span>

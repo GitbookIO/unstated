@@ -8,64 +8,77 @@ import {
 } from 'react';
 import { Container, ContainerConstructor } from './container';
 import { StateContext } from './provider';
+import { shallowEqual } from './shallowEqual';
 
-export type ContainersType<C extends Container> = Array<
-    ContainerConstructor<C> | C
->;
-export type ContainersInstance<
-    Containers extends ContainersType<Container>
-> = Container[];
+export type ContainerType<C extends Container> = ContainerConstructor<C> | C;
+type ShouldUpdateFn<C, R> = (c: C) => R;
 
 /*
  * Get the state of containers.
  */
-function useContainers<Containers extends ContainersType<Container>>(
-    ...containers: Containers
-): ContainersInstance<Containers> {
+export function useContainer<C extends Container>(
+    ContainerItem: ContainerType<C>
+): C {
     const map = useContext(StateContext);
     if (map === null) {
         throw new Error('You must wrap your hook component with a <Provider>');
     }
 
     return useMemo(() => {
-        return containers.map(ContainerItem => {
-            let instance;
-            if (
-                typeof ContainerItem === 'object' &&
-                ContainerItem instanceof Container
-            ) {
-                instance = ContainerItem;
-            } else {
-                instance = map.get(ContainerItem);
+        let instance;
+        if (
+            typeof ContainerItem === 'object' &&
+            ContainerItem instanceof Container
+        ) {
+            instance = ContainerItem;
+        } else {
+            instance = map.get(ContainerItem);
 
-                if (!instance) {
-                    instance = new ContainerItem();
-                    map.set(ContainerItem, instance);
-                }
+            if (!instance) {
+                instance = new ContainerItem();
+                map.set(ContainerItem, instance);
             }
-            return instance;
-        });
-    }, [map, ...containers]);
+        }
+        return instance;
+    }, [map, ContainerItem]);
 }
 
 /*
  * Get the state of containers and listen to updates.
  */
-function useUnstated<Containers extends ContainersType<Container>>(
-    ...containers: Containers
-): ContainersInstance<Containers> {
-    const instances = useContainers(...containers);
+export function useUnstated<C extends Container, UpdateCriteria = []>(
+    ContainerItem: ContainerType<C>,
+    /*
+     * Function to determine for which criteria the component should be updated.
+     * When a boolean is passed, it always update (or never).
+     */
+    shouldUpdate?: ShouldUpdateFn<C, UpdateCriteria>
+): C {
+    const instance = useContainer(ContainerItem);
     const setUpdates = useState(0)[1];
-    const instancesRef = useRef([]);
+    const instanceRef = useRef<C | null>(null);
+    const updateCriteriaRef = useRef<UpdateCriteria | null>(null);
+    const shouldUpdateRef = useRef<
+        ShouldUpdateFn<C, UpdateCriteria> | undefined
+    >(shouldUpdate);
     const unmountedRef = useRef(false);
 
-    const unsubscribe = () => {
-        instancesRef.current.forEach(container => {
-            container.unsubscribe(onUpdate);
-        });
+    shouldUpdateRef.current = shouldUpdate;
+
+    const computeShouldRender = (): boolean => {
+        if (!shouldUpdateRef.current) {
+            return true;
+        }
+
+        const result = shouldUpdateRef.current(instance);
+        return !shallowEqual(updateCriteriaRef.current, result);
     };
 
     const onUpdate = useCallback(() => {
+        if (!computeShouldRender()) {
+            return;
+        }
+
         return new Promise(resolve => {
             if (!unmountedRef.current) {
                 setUpdates(prev => prev + 1);
@@ -76,6 +89,12 @@ function useUnstated<Containers extends ContainersType<Container>>(
         });
     }, []);
 
+    const unsubscribe = () => {
+        if (instanceRef.current) {
+            instanceRef.current.unsubscribe(onUpdate);
+        }
+    };
+
     useEffect(() => {
         return () => {
             unmountedRef.current = true;
@@ -85,16 +104,15 @@ function useUnstated<Containers extends ContainersType<Container>>(
 
     // Return instances with listeners
     return useMemo(() => {
+        // Unsubscribe from previous instance
         unsubscribe();
 
-        instances.forEach(instance => {
-            instance.unsubscribe(onUpdate);
-            instance.subscribe(onUpdate);
-        });
+        instance.unsubscribe(onUpdate);
+        instance.subscribe(onUpdate);
 
-        instancesRef.current = instances;
-        return instancesRef.current;
-    }, instances);
+        computeShouldRender();
+
+        instanceRef.current = instance;
+        return instance;
+    }, [instance]);
 }
-
-export { useContainers, useUnstated };

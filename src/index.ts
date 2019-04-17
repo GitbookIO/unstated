@@ -1,6 +1,4 @@
-import { Container } from './container';
-import { useContainers, useUnstated } from './hooks';
-import { Subscribe } from './legacy';
-import { Provider } from './provider';
-
-export { Container, Provider, Subscribe, useContainers, useUnstated };
+export { Container } from './container';
+export { useContainer, useUnstated } from './hooks';
+export { Subscribe } from './legacy';
+export { Provider } from './provider';
