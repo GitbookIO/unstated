@@ -1,6 +1,6 @@
 {
     "name": "@gitbook/unstated",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "description": "Simple state library for react application",
     "main": "dist/unstated.js",
     "module": "dist/unstated.es.js",
