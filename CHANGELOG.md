@@ -2,6 +2,10 @@
 
 This project adheres to Semantic Versioning.
 
+## 2.0.1
+
+- Performance improvement: Use a native JS `Set` for `listeners`
+
 ## 2.0.0
 
 - `useUnstated` now only accept a single container and return its instance instead of an array.
