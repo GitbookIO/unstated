@@ -14,7 +14,7 @@ export type ContainerConstructor<C extends Container> = new () => C;
 // Base class for all container
 class Container<State = {}> {
     public state: State;
-    public listeners: Map<Listener, true> = new Map();
+    public listeners: Set<Listener> = new Set();
 
     public setState(
         updater: Partial<State> | ((prevState: State) => Partial<State> | null),
@@ -32,7 +32,7 @@ class Container<State = {}> {
             this.state = Object.assign({}, this.state, nextState);
 
             batchUpdates(() => {
-                this.listeners.forEach((value, listener) => {
+                this.listeners.forEach(listener => {
                     listener();
                 });
                 resolve();
@@ -47,7 +47,7 @@ class Container<State = {}> {
     }
 
     public subscribe(fn: Listener) {
-        this.listeners.set(fn, true);
+        this.listeners.add(fn);
     }
 
     public unsubscribe(fn: Listener) {
