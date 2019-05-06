@@ -98,11 +98,11 @@ test('should remove subscriber listeners if component is unmounted', () => {
     );
     const testInstance = tree.root.findByType(Subscribe)._fiber.stateNode;
 
-    expect(counter.listeners.length).toBe(1);
+    expect(counter.listeners.size).toBe(1);
 
     tree.unmount();
 
-    expect(counter.listeners.length).toBe(0);
+    expect(counter.listeners.size).toBe(0);
 });
 
 test('should remove subscriber listeners if component is unmounted with useUnstated', () => {
@@ -113,13 +113,13 @@ test('should remove subscriber listeners if component is unmounted with useUnsta
         </Provider>
     );
     expect(() => tree.root.findByType(CounterWithUse)).not.toThrow();
-    expect(counter.listeners.length).toBe(1);
+    expect(counter.listeners.size).toBe(1);
 
     tree.unmount();
     expect(() => tree.root.findByType(CounterWithUse)).toThrowError(
         "Can't access .root on unmounted test renderer"
     );
-    expect(counter.listeners.length).toBe(0);
+    expect(counter.listeners.size).toBe(0);
 });
 
 test('should throw an error if <Subscribe> component is not wrapper with <Provider>', () => {

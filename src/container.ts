@@ -14,13 +14,13 @@ export type ContainerConstructor<C extends Container> = new () => C;
 // Base class for all container
 class Container<State = {}> {
     public state: State;
-    public listeners: Listener[] = [];
+    public listeners: Map<Listener, true> = new Map();
 
     public setState(
         updater: Partial<State> | ((prevState: State) => Partial<State> | null),
         callback?: () => void
     ): Promise<void> {
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise(resolve => {
             const nextState =
                 typeof updater === 'function' ? updater(this.state) : updater;
 
@@ -32,15 +32,10 @@ class Container<State = {}> {
             this.state = Object.assign({}, this.state, nextState);
 
             batchUpdates(() => {
-                const promises = this.listeners.map(listener => listener());
-                Promise.all(promises).then(
-                    () => {
-                        resolve();
-                    },
-                    error => {
-                        reject(error);
-                    }
-                );
+                this.listeners.forEach((value, listener) => {
+                    listener();
+                });
+                resolve();
             });
         });
 
@@ -52,11 +47,11 @@ class Container<State = {}> {
     }
 
     public subscribe(fn: Listener) {
-        this.listeners.push(fn);
+        this.listeners.set(fn, true);
     }
 
     public unsubscribe(fn: Listener) {
-        this.listeners = this.listeners.filter(f => f !== fn);
+        this.listeners.delete(fn);
     }
 }
 
