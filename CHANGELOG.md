@@ -2,6 +2,10 @@
 
 This project adheres to Semantic Versioning.
 
+## 2.0.2
+
+- Compile to target `es2017` to support Microsoft Edge
+
 ## 2.0.1
 
 - Performance improvement: Use a native JS `Set` for `listeners`
