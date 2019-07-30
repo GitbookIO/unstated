@@ -71,7 +71,11 @@ export function useUnstated<C extends Container, UpdateCriteria = []>(
         }
 
         const result = shouldUpdateRef.current(instance);
-        return !shallowEqual(updateCriteriaRef.current, result);
+        const isEqual = !shallowEqual(updateCriteriaRef.current, result);
+
+        updateCriteriaRef.current = result;
+
+        return isEqual;
     };
 
     const onUpdate = useCallback(() => {

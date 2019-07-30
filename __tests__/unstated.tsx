@@ -14,12 +14,15 @@ async function click({ children = [] }, id) {
 }
 
 class CounterContainer extends Container<{ count: number }> {
-    public state = { count: 0 };
+    public state = { count: 0, offset: 0 };
     public increment(amount = 1) {
         this.setState({ count: this.state.count + amount });
     }
     public decrement(amount = 1) {
         this.setState({ count: this.state.count - amount });
+    }
+    public setOffset(offset) {
+        this.setState({ offset });
     }
 }
 
@@ -51,6 +54,23 @@ function CounterWithUse() {
             </button>
             <button id="increment" onClick={() => counter.increment()}>
                 +
+            </button>
+        </div>
+    );
+}
+
+function CounterWithShouldUpdate() {
+    const counter = useUnstated(
+        CounterContainer,
+        instance => instance.state.offset
+    );
+    return (
+        <div>
+            <span id="offset-text">
+                {counter.state.count + counter.state.offset}
+            </span>
+            <button id="reset" onClick={() => counter.setOffset(0)}>
+                reset
             </button>
         </div>
     );
@@ -115,6 +135,8 @@ test('should remove subscriber listeners if component is unmounted with useUnsta
     expect(() => tree.root.findByType(CounterWithUse)).not.toThrow();
     expect(counter.listeners.size).toBe(1);
 
+    counter.increment();
+
     tree.unmount();
     expect(() => tree.root.findByType(CounterWithUse)).toThrowError(
         "Can't access .root on unmounted test renderer"
@@ -134,4 +156,44 @@ test('should throw an error if component using useUnstated is not wrapper with <
     expect(() => render(<CounterWithUse />)).toThrowError(
         'You must wrap your hook component with a <Provider>'
     );
+});
+
+test('should not re-render if shouldUpdate has not changed', () => {
+    const counter = new CounterContainer();
+    const tree = renderer.create(
+        <Provider inject={[counter]}>
+            <CounterWithShouldUpdate />
+        </Provider>
+    );
+
+    renderer.act(() => {
+        const el: any = tree
+            .toJSON()
+            .children.find(({ props = {} }) => props.id === 'offset-text');
+        expect(el.children).toEqual(['0']);
+    });
+
+    // This update should not trigger a re-render
+    renderer.act(() => {
+        counter.increment();
+    });
+
+    renderer.act(() => {
+        const el: any = tree
+            .toJSON()
+            .children.find(({ props = {} }) => props.id === 'offset-text');
+        expect(el.children).toEqual(['0']);
+    });
+
+    // This update should trigger a re-render
+    renderer.act(() => {
+        counter.setOffset(10);
+    });
+
+    renderer.act(() => {
+        const el: any = tree
+            .toJSON()
+            .children.find(({ props = {} }) => props.id === 'offset-text');
+        expect(el.children).toEqual(['11']);
+    });
 });
