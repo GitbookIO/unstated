@@ -2,6 +2,10 @@
 
 This project adheres to Semantic Versioning.
 
+## 2.0.3
+
+- Fix second argument of `useUnstated` to skip update
+
 ## 2.0.2
 
 - Compile to target `es2017` to support Microsoft Edge
