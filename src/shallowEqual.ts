@@ -29,11 +29,8 @@ export function shallowEqual(objA: any, objB: any): boolean {
         return false;
     }
 
-    for (let i = 0; i < keysA.length; i += 1) {
-        if (
-            !hasOwn.call(objB, keysA[i]) ||
-            !is(objA[keysA[i]], objB[keysA[i]])
-        ) {
+    for (const keyA in keysA) {
+        if (!hasOwn.call(objB, keyA) || !is(objA[keyA], objB[keyA])) {
             return false;
         }
     }

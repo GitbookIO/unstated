@@ -1,10 +1,4 @@
-import {
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, ContainerConstructor } from './container';
 import { StateContext } from './provider';
 import { shallowEqual } from './shallowEqual';
@@ -55,7 +49,7 @@ export function useUnstated<C extends Container, UpdateCriteria = []>(
 ): C {
     const instance = useContainer(ContainerItem);
     const setUpdates = useState(0)[1];
-    const latestStateRef = useRef<object | null>(null)
+    const latestStateRef = useRef<object | null>(null);
     const updateCriteriaRef = useRef<UpdateCriteria | null>(null);
     const unmountedRef = useRef(false);
 
@@ -103,5 +97,5 @@ export function useUnstated<C extends Container, UpdateCriteria = []>(
     }, [instance]);
 
     latestStateRef.current = instance.state;
-    return instance
+    return instance;
 }
