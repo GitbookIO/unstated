@@ -1,5 +1,4 @@
 import {
-    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -56,67 +55,53 @@ export function useUnstated<C extends Container, UpdateCriteria = []>(
 ): C {
     const instance = useContainer(ContainerItem);
     const setUpdates = useState(0)[1];
-    const instanceRef = useRef<C | null>(null);
+    const latestStateRef = useRef<object | null>(null)
     const updateCriteriaRef = useRef<UpdateCriteria | null>(null);
+    const unmountedRef = useRef(false);
+
+    // Allow shouldUpdate to be a changing arrow function
     const shouldUpdateRef = useRef<
         ShouldUpdateFn<C, UpdateCriteria> | undefined
     >(shouldUpdate);
-    const unmountedRef = useRef(false);
-
     shouldUpdateRef.current = shouldUpdate;
 
-    const computeShouldRender = (): boolean => {
-        if (!shouldUpdateRef.current) {
-            return true;
-        }
+    useEffect(() => {
+        const computeShouldRender = () => {
+            // When no shouldUpdate, we just compare the raw reference state
+            if (!shouldUpdateRef.current) {
+                if (latestStateRef.current !== instance.state) {
+                    latestStateRef.current = instance.state;
+                    return true;
+                }
+                return false;
+            }
 
-        const result = shouldUpdateRef.current(instance);
-        const isEqual = !shallowEqual(updateCriteriaRef.current, result);
+            const result = shouldUpdateRef.current(instance);
+            const isEqual = !shallowEqual(updateCriteriaRef.current, result);
+            updateCriteriaRef.current = result;
+            return isEqual;
+        };
 
-        updateCriteriaRef.current = result;
-
-        return isEqual;
-    };
-
-    const onUpdate = useCallback(() => {
-        if (!computeShouldRender()) {
-            return;
-        }
-
-        return new Promise(resolve => {
+        const onUpdate = () => {
+            if (!computeShouldRender()) {
+                return;
+            }
             if (!unmountedRef.current) {
                 setUpdates(prev => prev + 1);
-                resolve();
-            } else {
-                resolve();
             }
-        });
-    }, []);
-
-    const unsubscribe = () => {
-        if (instanceRef.current) {
-            instanceRef.current.unsubscribe(onUpdate);
-        }
-    };
-
-    useEffect(() => {
-        return () => {
-            unmountedRef.current = true;
-            unsubscribe();
         };
-    }, []);
 
-    // Return instances with listeners
-    return useMemo(() => {
-        // Unsubscribe from previous instance
-        unsubscribe();
-
-        instance.unsubscribe(onUpdate);
         instance.subscribe(onUpdate);
 
-        computeShouldRender();
+        // Between render and useEffect, it may have changed
+        onUpdate();
 
-        instanceRef.current = instance;
-        return instance;
+        return () => {
+            unmountedRef.current = true;
+            instance.unsubscribe(onUpdate);
+        };
     }, [instance]);
+
+    latestStateRef.current = instance.state;
+    return instance
 }

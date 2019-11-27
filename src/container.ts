@@ -1,11 +1,3 @@
-import { unstable_batchedUpdates } from 'react-dom';
-
-const batchUpdates =
-    unstable_batchedUpdates ||
-    ((callback: () => void) => {
-        callback();
-    });
-
 type Listener = () => void;
 
 // Type interface for the constructor of a container
@@ -17,32 +9,18 @@ class Container<State = {}> {
     public listeners: Set<Listener> = new Set();
 
     public setState(
-        updater: Partial<State> | ((prevState: State) => Partial<State> | null),
-        callback?: () => void
-    ): Promise<void> {
-        const promise = new Promise(resolve => {
-            const nextState =
-                typeof updater === 'function' ? updater(this.state) : updater;
+        updater: Partial<State> | ((prevState: State) => Partial<State> | null)
+    ) {
+        const nextState =
+            typeof updater === 'function' ? updater(this.state) : updater;
 
-            if (nextState == null) {
-                resolve();
-                return;
-            }
+        if (nextState == null) {
+            return;
+        }
 
-            this.state = Object.assign({}, this.state, nextState);
-
-            batchUpdates(() => {
-                this.listeners.forEach(listener => {
-                    listener();
-                });
-                resolve();
-            });
-        });
-
-        return promise.then(() => {
-            if (callback) {
-                callback();
-            }
+        this.state = Object.assign({}, this.state, nextState);
+        this.listeners.forEach(listener => {
+            listener();
         });
     }
 
