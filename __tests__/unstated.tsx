@@ -111,13 +111,14 @@ test('should incresase/decrease state counter in container using useUnstated', a
 
 test('should remove subscriber listeners if component is unmounted', () => {
     const counter = new CounterContainer();
-    const tree = renderer.create(
-        <Provider inject={[counter]}>
-            <Counter />
-        </Provider>
-    );
-    const testInstance = tree.root.findByType(Subscribe)._fiber.stateNode;
-
+    let tree;
+    renderer.act(() => {
+        tree = renderer.create(
+            <Provider inject={[counter]}>
+                <Counter />
+            </Provider>
+        );
+    });
     expect(counter.listeners.size).toBe(1);
 
     tree.unmount();
@@ -127,15 +128,20 @@ test('should remove subscriber listeners if component is unmounted', () => {
 
 test('should remove subscriber listeners if component is unmounted with useUnstated', () => {
     const counter = new CounterContainer();
-    const tree = renderer.create(
-        <Provider inject={[counter]}>
-            <CounterWithUse />
-        </Provider>
-    );
+    let tree;
+    renderer.act(() => {
+        tree = renderer.create(
+            <Provider inject={[counter]}>
+                <CounterWithUse />
+            </Provider>
+        );
+    });
     expect(() => tree.root.findByType(CounterWithUse)).not.toThrow();
     expect(counter.listeners.size).toBe(1);
 
-    counter.increment();
+    renderer.act(() => {
+        counter.increment();
+    });
 
     tree.unmount();
     expect(() => tree.root.findByType(CounterWithUse)).toThrowError(
