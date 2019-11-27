@@ -2,6 +2,11 @@
 
 This project adheres to Semantic Versioning.
 
+## 3.0.0
+
+- This module is now designed for the upcoming concurrent mode of React. Avoid usin this version for a non concurrent mode React application.
+- `setState` is now sync
+
 ## 2.0.3
 
 - Fix second argument of `useUnstated` to skip update

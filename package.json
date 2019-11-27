@@ -1,6 +1,6 @@
 {
     "name": "@gitbook/unstated",
-    "version": "2.0.3",
+    "version": "3.0.0-pre.1",
     "description": "Simple state library for react application",
     "main": "dist/unstated.js",
     "module": "dist/unstated.es.js",
@@ -18,10 +18,8 @@
     "devDependencies": {
         "@types/jest": "^24.0.11",
         "@types/react": "^16.8.8",
-        "@types/react-dom": "^16.8.3",
         "jest": "^24.5.0",
         "react": "^16.8.4",
-        "react-dom": "^16.8.4",
         "react-test-renderer": "^16.8.4",
         "rollup": "^1.7.0",
         "rollup-plugin-typescript2": "^0.20.1",
